@@ -2,7 +2,7 @@ from datetime import datetime
 import time
 import os
 import io
-import pprint
+import logging
 
 import requests
 import nft_storage
@@ -25,19 +25,39 @@ CONTRACTS = dict(
 ZORA_API_BASE = "https://api.zora.co/premint/"
 
 ZORA_MAINNET = dict(
-    rpc="https://rpc.zora.energy/", chainId=777777, chainName="ZORA-MAINNET"
+    rpc="https://rpc.zora.energy/",
+    chainId=777777,
+    chainName="ZORA-MAINNET",
+    isTestnet=False,
+    zoraChainPrefix="zora",
 )
 ZORA_TESTNET = dict(
-    rpc="https://testnet.rpc.zora.energy/", chainId=999, chainName="ZORA-GOERLI"
+    rpc="https://testnet.rpc.zora.energy/",
+    chainId=999,
+    chainName="ZORA-GOERLI",
+    isTestnet=True,
+    zoraChainPrefix="zgor",
 )
 
+# only zora mainnet works right now
 NETWORK = ZORA_TESTNET
 
+OPEN_EDITION_MINT_SIZE = 18446744073709551615
+
+TOKEN_CONFIG = dict(
+    maxSupply=OPEN_EDITION_MINT_SIZE,  # number of mints
+    mintDuration=60 * 60 * 24 * 3,  # in seconds (currently 7 days)
+    pricePerToken=0,  # in wei
+    maxTokensPerAddress=0,  # 0=limited, any other # is a limit
+    mintStart=0,  # set a mint start in the future, set to 0 for immediate minting allowed
+    royaltyBPS=1000,  # BPS royalty amount (1000 = 10% resale royalty suggestion)
+)
 
 
 PREMINTER_EXECUTOR_ABI = None
-with open('./premint_abi.json') as f:
-    PREMINTER_EXECUTOR_ABI = json.read(f)
+with open("./premint_abi.json") as f:
+    PREMINTER_EXECUTOR_ABI = json.load(f)
+
 
 def take_photo():
     camera = cv2.VideoCapture(0)
@@ -78,28 +98,43 @@ def upload_photo(photo):
             metadata_cid = metadata_stored["value"]["cid"]
             return f"ipfs://{metadata_cid}"
         except nft_storage.ApiException as e:
-            print("Exception when calling NFTStorageAPI->store: %s\n" % e)
+            logging.error("Exception when calling NFTStorageAPI->store: %s" % e)
 
 
-def get_verifying_address(w3: Web3, **contractData):
-    preminter_contract = w3.eth.contract(
-        CONTRACTS["preminterContract"], abi=PREMINTER_GET_CONTRACT_ADDRESS_ABI
-    )
-    return preminter_contract.caller.getContractAddress(contractData)
+def get_preminter_contract(w3: Web3):
+    return w3.eth.contract(CONTRACTS["preminterContract"], abi=PREMINTER_EXECUTOR_ABI)
+
+
+def get_target_contract_address(w3: Web3, **contractData):
+    return get_preminter_contract(w3).caller.getContractAddress(contractData)
 
 
 def get_next_uid(verifying_address: str, chain_name: str):
     next_uid_response = requests.get(
-        f"{ZORA_API_BASE}signature/{chain_name}/{verifying_address}/next_uid"
+        f"{ZORA_API_BASE}signature/{chain_name}/{verifying_address.lower()}/next_uid"
     ).json()
-    print(next_uid_response)
+    logging.info("getting next uid : ", extra=next_uid_response)
     return next_uid_response["next_uid"]
+
+
+def get_minting_url(premint_response):
+    contract_address = premint_response["contract_address"]
+    uid = premint_response["api_data"]["premint"]["uid"]
+    zora_chain_prefix = NETWORK["zoraChainPrefix"]
+    domain = "zora.co"
+    if NETWORK["isTestnet"]:
+        domain = "testnet.zora.co"
+    return (
+        f"https://{domain}/collect/{zora_chain_prefix}:{contract_address}/premint-{uid}"
+    )
 
 
 def create_premint_data(metadata_url):
     w3 = Web3(Web3.HTTPProvider(NETWORK["rpc"]))
+    private_key = os.getenv("SIGNING_USER_PRIVATE_KEY")
 
-    account = Account.create(os.getenv("SIGNING_USER_PRIVATE_KEY"))
+    account = Account.from_key(private_key)
+
     sender_address = account.address
 
     collection_data = dict(
@@ -109,25 +144,25 @@ def create_premint_data(metadata_url):
     )
 
     # web3py get verifying address
-    verifying_address = get_verifying_address(w3=w3, **collection_data)
-
-    uid = get_next_uid(verifying_address, NETWORK["chainName"])
-
-    print("verifying address", verifying_address)
+    target_contract_address = get_target_contract_address(w3=w3, **collection_data)
 
     # centralized ZORA get nonce
+    uid = get_next_uid(target_contract_address, NETWORK["chainName"])
 
+    logging.info(f"Signing with uid {uid} and sender address {sender_address}")
+
+    # setup signing message data
     message_data = dict(
         tokenConfig=dict(
             tokenURI=metadata_url,
-            maxSupply=18446744073709551615,
-            maxTokensPerAddress=0,
-            pricePerToken=0,
-            mintStart=0,
+            maxSupply=TOKEN_CONFIG["maxSupply"],
+            maxTokensPerAddress=TOKEN_CONFIG["maxTokensPerAddress"],
+            pricePerToken=TOKEN_CONFIG["pricePerToken"],
+            mintStart=TOKEN_CONFIG["mintStart"],
             # one week
-            mintDuration=60 * 60 * 24 * 7,
+            mintDuration=TOKEN_CONFIG["mintDuration"],
             royaltyMintSchedule=0,
-            royaltyBPS=1000,
+            royaltyBPS=TOKEN_CONFIG["royaltyBPS"],
             royaltyRecipient=sender_address,
             fixedPriceMinter=CONTRACTS["fixedPriceMinter"],
         ),
@@ -136,14 +171,12 @@ def create_premint_data(metadata_url):
         deleted=False,
     )
 
-    pprint.pprint(message_data)
-
     message = encode_structured_data(
         dict(
             domain=dict(
-                chainId=7777777,
+                chainId=NETWORK["chainId"],
                 name="Preminter",
-                verifyingContract=verifying_address,
+                verifyingContract=target_contract_address,
                 version="1",
             ),
             message=message_data,
@@ -176,39 +209,58 @@ def create_premint_data(metadata_url):
             },
         )
     )
-    sig = Account.sign_message(
+    signature = account.sign_message(
         signable_message=message,
-        private_key=os.getenv("SIGNING_USER_PRIVATE_KEY"),
-    )
+        # private_key=os.getenv("SIGNING_USER_PRIVATE_KEY"),
+    ).signature.hex()
 
     api_data = dict(
         collection=collection_data,
         premint=message_data,
         chain_name=NETWORK["chainName"],
-        signature=Web3.to_hex(sig.signature),
+        signature=signature,
     )
 
-    pprint.pprint(api_data)
+    # for debugging when API says invalid
+    # contract_response = get_preminter_contract(w3).caller.isValidSignature(
+    #     collection_data, message_data, signature
+    # )
 
     api_response = requests.post(
         f"{ZORA_API_BASE}signature",
         json=api_data,
-    ).json()
+    )
 
-    pprint.pprint(api_response)
+    if api_response.status_code != 200:
+        logging.error(
+            "Error getting API premint status",
+            extra=dict(content=api_response.content, headers=api_response.headers),
+        )
+        raise RuntimeError("Cannot mint")
+
+    api_json = api_response.json()
+
+    return dict(
+        api_response=api_json,
+        api_data=api_data,
+        contract_address=target_contract_address,
+    )
 
 
 def main():
-    # frame = take_photo()
     # pprint.pprint(frame)
-    # photo_url = upload_photo(frame)
+    frame = take_photo()
+    photo_metadata = upload_photo(frame)
     # print(photo_url)
     # return
-    photo_metadata = (
-        "ipfs://bafkreid6qa3z5qbiamt24rj2hskfg6nnqrieznexwzefcpb4c7zlb66l7u"
-    )
-    create_premint_data(photo_metadata)
+    # photo_metadata = (
+    #     "ipfs://bafkreid6qa3z5qbiamt24rj2hskfg6nnqrieznexwzefcpb4c7zlb66l7u"
+    # )
+    premint_signature_data = create_premint_data(photo_metadata)
+    minting_url = get_minting_url(premint_signature_data)
+    print(minting_url)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     main()
