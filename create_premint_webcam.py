@@ -246,13 +246,11 @@ def create_premint_data(metadata_url):
         contract_address=target_contract_address,
     )
 
-
+# example usage
 def main():
-    # pprint.pprint(frame)
     frame = take_photo()
     photo_metadata = upload_photo(frame)
-    # print(photo_url)
-    # return
+    # demo 
     # photo_metadata = (
     #     "ipfs://bafkreid6qa3z5qbiamt24rj2hskfg6nnqrieznexwzefcpb4c7zlb66l7u"
     # )
