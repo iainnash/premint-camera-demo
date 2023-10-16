@@ -222,9 +222,9 @@ def create_premint_data(metadata_url):
     )
 
     # for debugging when API says invalid
-    # contract_response = get_preminter_contract(w3).caller.isValidSignature(
-    #     collection_data, message_data, signature
-    # )
+    contract_response = get_preminter_contract(w3).caller.isValidSignature(
+        collection_data, message_data, signature
+    )
 
     api_response = requests.post(
         f"{ZORA_API_BASE}signature",
