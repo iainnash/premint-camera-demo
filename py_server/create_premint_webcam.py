@@ -26,7 +26,7 @@ ZORA_API_BASE = "https://api.zora.co/premint/"
 
 ZORA_MAINNET = dict(
     rpc="https://rpc.zora.energy/",
-    chainId=777777,
+    chainId=7777777,
     chainName="ZORA-MAINNET",
     isTestnet=False,
     zoraChainPrefix="zora",
@@ -70,6 +70,8 @@ def take_photo():
         ret, encoded = cv2.imencode(".jpg", frame)
         if ret:
             return io.BytesIO(encoded.tobytes())
+        else:
+            raise RuntimeError("No image")
 
 
 def upload_photo(photo):
@@ -211,7 +213,6 @@ def create_premint_data(metadata_url):
     )
     signature = account.sign_message(
         signable_message=message,
-        # private_key=os.getenv("SIGNING_USER_PRIVATE_KEY"),
     ).signature.hex()
 
     api_data = dict(
@@ -221,10 +222,13 @@ def create_premint_data(metadata_url):
         signature=signature,
     )
 
+    print(collection_data, message_data, signature)
     # for debugging when API says invalid
     contract_response = get_preminter_contract(w3).caller.isValidSignature(
         collection_data, message_data, signature
     )
+    print(contract_response)
+    logging.info(f"Contract response {contract_response}")
 
     api_response = requests.post(
         f"{ZORA_API_BASE}signature",
@@ -232,6 +236,8 @@ def create_premint_data(metadata_url):
     )
 
     if api_response.status_code != 200:
+        print(api_response.content)
+        print(api_response.headers)
         logging.error(
             "Error getting API premint status",
             extra=dict(content=api_response.content, headers=api_response.headers),
@@ -246,14 +252,15 @@ def create_premint_data(metadata_url):
         contract_address=target_contract_address,
     )
 
+
 # example usage
 def main():
-    frame = take_photo()
-    photo_metadata = upload_photo(frame)
-    # demo 
-    # photo_metadata = (
-    #     "ipfs://bafkreid6qa3z5qbiamt24rj2hskfg6nnqrieznexwzefcpb4c7zlb66l7u"
-    # )
+    # frame = take_photo()
+    # photo_metadata = upload_photo(frame)
+    # demo
+    photo_metadata = (
+        "ipfs://bafkreid6qa3z5qbiamt24rj2hskfg6nnqrieznexwzefcpb4c7zlb66l7u"
+    )
     premint_signature_data = create_premint_data(photo_metadata)
     minting_url = get_minting_url(premint_signature_data)
     print(minting_url)
