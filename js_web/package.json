@@ -1,0 +1,10 @@
+{
+  "name": "js_web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@zoralabs/zora-1155-contracts": "^2.0.4",
+    "viem": "^1.16.5"
+  }
+}
