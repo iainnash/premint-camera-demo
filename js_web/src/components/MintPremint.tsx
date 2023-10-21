@@ -1,46 +1,129 @@
-import React, { useState, useCallback, SyntheticEvent } from "react";
+import React, {
+  useState,
+  useCallback,
+  SyntheticEvent,
+  useEffect,
+  ReactNode,
+} from "react";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { ConnectWallet } from "./ConnectWallet";
-// import { PremintAPI } from "@zoralabs/premint-sdk";
-import styles from './MintPremint.module.css';
+import { PremintAPI } from "@zoralabs/premint-sdk";
+import styles from "./MintPremint.module.css";
 import { PhotoButton } from "./PhotoButton";
 import Webcam from "react-webcam";
+import { FancyButton } from "./FancyButton";
 
 export const MintPremint = () => {
   const [mintContract, setMintContract] = useState("");
   const [uid, setUID] = useState("");
-  const { isConnected } = useAccount();
+  const [minting, setMinting] = useState<null | string>(null);
+  const [success, setSuccess] = useState<ReactNode | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
+
+  const { isConnected, address } = useAccount();
+
   const { data: walletClient } = useWalletClient();
 
   const publicClient = usePublicClient();
-  const processPremint = useCallback(
-    async (evt: SyntheticEvent) => {
-      evt.preventDefault();
 
+  const processPremint = useCallback(
+    async (url: string) => {
       if (!walletClient) {
+        console.error("no walletclient");
         return;
       }
-      const premintAPI: any = null;//new PremintAPI(walletClient.chain);
+      const premintAPI: any = new PremintAPI(walletClient.chain);
 
       const premint = await premintAPI.createPremint({
-        checkSignature: true, 
+        checkSignature: true,
         collection: {
-          contractAdmin: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-          contractName: "Testing Contract",
+          contractAdmin: address,
+          contractName: "Camera Roll",
           contractURI:
-            "ipfs://bafkreiainxen4b4wz4ubylvbhons6rembxdet4a262nf2lziclqvv7au3e",
+            "ipfs://bafkreibhv77r5pijfaafx3vv6hphlira2kefouzrbhow2dzl7kornv5wcq",
         },
         publicClient,
         account: walletClient.account.address,
         walletClient,
         token: {
-          tokenURI:
-            "ipfs://bafkreice23maski3x52tsfqgxstx3kbiifnt5jotg3a5ynvve53c4soi2u",
+          tokenURI: url,
         },
       });
       console.log({ premint });
+      return premint;
     },
     [publicClient, walletClient, mintContract, uid, isConnected]
+  );
+
+  const clearState = useCallback(() => {
+    setFailure(null);
+    setSuccess(null);
+    setMinting(null);
+  }, [setFailure, setSuccess, setMinting]);
+
+  const uploadImage = useCallback(
+    async (imageData: string) => {
+      setFailure(null);
+      setSuccess(null);
+      if (!walletClient) {
+        console.error("Missing walletClient");
+        setFailure("Missing walletClient");
+        return;
+      }
+      setMinting(imageData);
+      const response = await fetch("/api/store", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json",
+        },
+        body: JSON.stringify({
+          image: imageData,
+        }),
+      });
+      if (response.status === 200) {
+        console.log("loaded");
+        setSuccess(
+          <div>
+            <p>Uploaded...</p>
+            <p>sign mint in wallet</p>
+          </div>
+        );
+        const { url } = await response.json();
+        try {
+          console.log({ url });
+          const { zoraUrl } = await processPremint(url);
+          setSuccess(
+            <div>
+              <p>Minted 🎉</p>
+              <p>
+                <a target="_blank" href={zoraUrl}>
+                  📸 view on ZORA
+                </a>
+              </p>
+              <p>
+                <FancyButton onClick={() => clearState()}>
+                  📷 take another...
+                </FancyButton>
+              </p>
+            </div>
+          );
+        } catch (err: any) {
+          setFailure("Premint failed");
+          console.error(err);
+        }
+      } else {
+        setFailure("Issue uploading");
+      }
+    },
+    [
+      processPremint,
+      walletClient,
+      clearState,
+      setFailure,
+      setSuccess,
+      clearState,
+    ]
   );
 
   if (!isConnected) {
@@ -48,12 +131,47 @@ export const MintPremint = () => {
   }
 
   return (
-    <div style={styles.page}>
-      <Webcam />
+    <div className={styles.page}>
+      <div className={minting ? styles.minting : styles.inactiveMinting}>
+        {minting && !success && !failure && (
+          <div className={styles.message}>☁☁️☁️️ uploading ☁️☁️☁</div>
+        )}
+        {success && !failure && <div className={styles.message}>{success}</div>}
+        {failure && (
+          <div className={styles.message}>
+            <p>{failure}</p>
+            {minting && (
+              <FancyButton onClick={() => uploadImage(minting)}>
+                ↭ try again ↭
+              </FancyButton>
+            )}
+            <p>
+              <FancyButton onClick={() => clearState()}>
+                fauhgeddaboudit – 📸 another
+              </FancyButton>
+            </p>
+          </div>
+        )}
+      </div>
+      <div className={styles.webcam}>
+        <Webcam forceScreenshotSourceSize={true} screenshotFormat="image/jpeg">
+          {/* @ts-ignore */}
+          {({ getScreenshot }: any) => (
+            <button
+              className={styles.takePhoto}
+              onClick={(evt) => {
+                evt.preventDefault();
+
+                const imageSrc = getScreenshot();
+                uploadImage(imageSrc);
+              }}
+            >
+              <PhotoButton />
+            </button>
+          )}
+        </Webcam>
+      </div>
       <h2>on-chain cam</h2>
-      <button>
-        <PhotoButton />
-      </button>
     </div>
   );
 };

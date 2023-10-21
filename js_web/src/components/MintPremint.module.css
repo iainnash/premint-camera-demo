@@ -1,0 +1,64 @@
+.takePhoto {
+  background-color: transparent;
+  z-index: 1;
+  position: absolute;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  bottom: 2%;
+}
+
+.webcam {
+}
+
+.minting::after,
+.inactiveMinting::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: top 2s ease-in;
+  background: linear-gradient(
+    180deg,
+    #03ff1c 0%,
+    #a8ff38 26.46%,
+    #619b8f 49.42%,
+    #004bff 73.93%,
+    #eb00ff 100%
+  );
+  content: " ";
+  z-index: 1;
+}
+.inactiveMinting::after {
+  top: 100%;
+}
+.minting::after {
+  top: 0;
+}
+.minting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90vh;
+}
+
+.message {
+  font-size: 45px;
+  z-index: 10;
+  text-align: center;
+  filter: invert(1);
+  mix-blend-mode: difference;
+  font-weight: 800;
+}
+
+.webcam video {
+  z-index: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+}

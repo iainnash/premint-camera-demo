@@ -20,6 +20,9 @@ button {
 button:hover {
   transform: scale(1.05);
 }
+button:disabled {
+  cursor: none;
+}
 
 body,
 html,

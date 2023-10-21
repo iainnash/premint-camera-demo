@@ -1,16 +1,16 @@
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
 
 const Page = () => {
-  const MintPremint = dynamic(() =>
-    import("../components/MintPremint").then((res) => res.MintPremint)
+  const MintPremint = dynamic(
+    async () => (await import("../components/MintPremint")).MintPremint,
+    {
+      loading: (props) => (
+        <div>loading... {JSON.stringify(props.error?.toString())}</div>
+      ),
+    }
   );
 
-  return (
-    <Suspense fallback={<div>loading...</div>}>
-      <MintPremint />
-    </Suspense>
-  );
+  return <MintPremint />;
 };
 
 export default Page;
