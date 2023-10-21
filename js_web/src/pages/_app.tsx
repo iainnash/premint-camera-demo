@@ -8,7 +8,7 @@ import { AppProps } from "next/app";
 import "./global.css"
 
 const { chains, publicClient } = configureChains(
-  [zora, zoraTestnet],
+  process.env.NEXT_PUBLIC_INCLUDE_TESTNET ? [zora, zoraTestnet] : [zora],
   [publicProvider()]
 );
 

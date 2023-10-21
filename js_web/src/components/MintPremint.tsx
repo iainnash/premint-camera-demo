@@ -171,7 +171,6 @@ export const MintPremint = () => {
           )}
         </Webcam>
       </div>
-      <h2>on-chain cam</h2>
     </div>
   );
 };

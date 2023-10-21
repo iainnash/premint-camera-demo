@@ -28,7 +28,7 @@ export const ConnectWallet = () => {
 
   return (
     <div className={styles.connect}>
-      <div className={styles.description}>Connect to web3 to post:</div>
+      <div className={styles.description}>Connect ↝ Capture ↠ Mint ⇉ Enjoy</div>
       {connectors
         .filter((connector) => connector.ready)
         .map((connector) => (
