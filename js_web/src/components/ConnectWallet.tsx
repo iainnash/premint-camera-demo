@@ -29,19 +29,21 @@ export const ConnectWallet = () => {
   return (
     <div className={styles.connect}>
       <div className={styles.description}>Connect to web3 to post:</div>
-      {connectors.map((connector) => (
-        <FancyButton
-          disabled={!connector.ready}
-          key={connector.id}
-          onClick={() => connect({ connector })}
-        >
-          {connector.name}
-          {!connector.ready && " (unsupported)"}
-          {isLoading &&
-            connector.id === pendingConnector?.id &&
-            " (connecting)"}
-        </FancyButton>
-      ))}
+      {connectors
+        .filter((connector) => connector.ready)
+        .map((connector) => (
+          <FancyButton
+            disabled={!connector.ready}
+            key={connector.id}
+            onClick={() => connect({ connector })}
+          >
+            {connector.name}
+            {!connector.ready && " (unsupported)"}
+            {isLoading &&
+              connector.id === pendingConnector?.id &&
+              " (connecting)"}
+          </FancyButton>
+        ))}
 
       {error && <div className={styles.error}>{error.message}</div>}
     </div>
