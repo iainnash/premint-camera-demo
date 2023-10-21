@@ -12,7 +12,7 @@ import styles from "./MintPremint.module.css";
 import { PhotoButton } from "./PhotoButton";
 import Webcam from "react-webcam";
 import { FancyButton } from "./FancyButton";
-import SwitchCamera from "./SwitchCamera";
+import {SwitchCamera} from "./SwitchCamera";
 
 export const MintPremint = () => {
   const [mintContract, setMintContract] = useState("");
