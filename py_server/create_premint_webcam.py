@@ -222,7 +222,7 @@ def create_premint_data(metadata_url):
         signature=signature,
     )
 
-    print(collection_data, message_data, signature)
+    # pprint.pprint(dict(collection_data, message_data, signature))
     # for debugging when API says invalid
     contract_response = get_preminter_contract(w3).caller.isValidSignature(
         collection_data, message_data, signature
@@ -237,6 +237,7 @@ def create_premint_data(metadata_url):
 
     if api_response.status_code != 200:
         print(api_response.content)
+        print(api_response.status_code)
         print(api_response.headers)
         logging.error(
             "Error getting API premint status",

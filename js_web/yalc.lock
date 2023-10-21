@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "packages": {
+    "@zoralabs/zora-1155-contracts": {
+      "signature": "0f120bf5830be690f83a3e68fe26858f"
+    },
+    "premint-sdk": {
+      "signature": "ec313f3b678e7bf6aa602f20d6a61603"
+    },
+    "@zoralabs/premint-sdk": {
+      "signature": "247478ccbdb1e488f8b625791e43f784"
+    }
+  }
+}
