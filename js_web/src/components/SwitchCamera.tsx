@@ -26,4 +26,3 @@ export const SwitchCamera = (props: any) => (
     </g>
   </svg>
 );
-export default SvgComponent;
