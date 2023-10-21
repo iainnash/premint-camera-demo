@@ -12,6 +12,7 @@ import styles from "./MintPremint.module.css";
 import { PhotoButton } from "./PhotoButton";
 import Webcam from "react-webcam";
 import { FancyButton } from "./FancyButton";
+import SwitchCamera from "./SwitchCamera";
 
 export const MintPremint = () => {
   const [mintContract, setMintContract] = useState("");
@@ -19,6 +20,25 @@ export const MintPremint = () => {
   const [minting, setMinting] = useState<null | string>(null);
   const [success, setSuccess] = useState<ReactNode | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  const [videoConstraints, setVideoConstraints] = useState<any>({
+    facingMode: "user",
+  });
+  const [hasMultipleDevices, setHasMultipleDevices] = useState(false);
+
+  const switchCamera = useCallback(() => {
+    if (videoConstraints.facingMode === "user") {
+      return setVideoConstraints({ facingMode: { exact: "environment" } });
+    }
+    setVideoConstraints({ facingMode: "user" });
+  }, [videoConstraints, setVideoConstraints]);
+
+  React.useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      if (devices.filter((device) => device.kind === "videoinput").length > 1) {
+        setHasMultipleDevices(true);
+      }
+    });
+  }, [setHasMultipleDevices]);
 
   const { isConnected, address } = useAccount();
 
@@ -154,7 +174,11 @@ export const MintPremint = () => {
         )}
       </div>
       <div className={styles.webcam}>
-        <Webcam forceScreenshotSourceSize={true} screenshotFormat="image/jpeg">
+        <Webcam
+          forceScreenshotSourceSize={true}
+          videoConstraints={videoConstraints}
+          screenshotFormat="image/jpeg"
+        >
           {/* @ts-ignore */}
           {({ getScreenshot }: any) => (
             <button
@@ -170,6 +194,11 @@ export const MintPremint = () => {
             </button>
           )}
         </Webcam>
+        {hasMultipleDevices && (
+          <button onClick={switchCamera} className={styles.switch}>
+            <SwitchCamera />
+          </button>
+        )}
       </div>
     </div>
   );

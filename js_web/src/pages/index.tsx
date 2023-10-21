@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import styles from "./index.module.css";
-import { useAccount, useDisconnect, useEnsAddress, useEnsName } from "wagmi";
+import { useAccount, useDisconnect, useEnsName } from "wagmi";
 
 const Page = () => {
   const MintPremint = dynamic(
