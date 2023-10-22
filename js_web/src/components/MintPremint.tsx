@@ -4,6 +4,7 @@ import React, {
   SyntheticEvent,
   useEffect,
   ReactNode,
+  useMemo,
 } from "react";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { ConnectWallet } from "./ConnectWallet";
@@ -12,27 +13,32 @@ import styles from "./MintPremint.module.css";
 import { PhotoButton } from "./PhotoButton";
 import Webcam from "react-webcam";
 import { FancyButton } from "./FancyButton";
-import {SwitchCamera} from "./SwitchCamera";
+import { SwitchCamera } from "./SwitchCamera";
+import { zorbImageDataURI } from "@zoralabs/zorb";
 
 export const MintPremint = () => {
   const [mintContract, setMintContract] = useState("");
   const [uid, setUID] = useState("");
   const [minting, setMinting] = useState<null | string>(null);
   const [success, setSuccess] = useState<ReactNode | null>(null);
-  const [failure, setFailure] = useState<string | null>(null);
+  const [failure, setFailure] = useState<ReactNode | null>(null);
   const [videoConstraints, setVideoConstraints] = useState<any>({
     facingMode: "user",
   });
   const [hasMultipleDevices, setHasMultipleDevices] = useState(false);
 
-  const switchCamera = useCallback(() => {
-    if (videoConstraints.facingMode === "user") {
-      return setVideoConstraints({ facingMode: { exact: "environment" } });
-    }
-    setVideoConstraints({ facingMode: "user" });
-  }, [videoConstraints, setVideoConstraints]);
+  const switchCamera = useCallback(
+    (evt: SyntheticEvent) => {
+      evt.preventDefault();
+      if (videoConstraints.facingMode === "user") {
+        return setVideoConstraints({ facingMode: { exact: "environment" } });
+      }
+      setVideoConstraints({ facingMode: "user" });
+    },
+    [videoConstraints, setVideoConstraints]
+  );
 
-  React.useEffect(() => {
+  const checkHasMultipleCameras = useCallback(() => {
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       if (devices.filter((device) => device.kind === "videoinput").length > 1) {
         setHasMultipleDevices(true);
@@ -41,6 +47,10 @@ export const MintPremint = () => {
   }, [setHasMultipleDevices]);
 
   const { isConnected, address } = useAccount();
+  const zorbImage = useMemo(
+    () => address && zorbImageDataURI(address),
+    [address]
+  );
 
   const { data: walletClient } = useWalletClient();
 
@@ -129,6 +139,18 @@ export const MintPremint = () => {
             </div>
           );
         } catch (err: any) {
+          if (err.message === "Bad response: 403") {
+            setFailure(
+              <>
+                <p>Mint failed. Your wallet needs to be verified on zora.co.</p>
+                <p>
+                  <a href="https://zora.co/create" target="_blank">
+                    zora.co verify
+                  </a>
+                </p>
+              </>
+            );
+          }
           setFailure("Premint failed");
           console.error(err);
         }
@@ -152,9 +174,17 @@ export const MintPremint = () => {
 
   return (
     <div className={styles.page}>
-      <div className={minting ? styles.minting : styles.inactiveMinting}>
+      <div
+        className={
+          minting
+            ? `${styles.minting} ${styles.inactiveMinting}`
+            : `${styles.inactiveMinting}`
+        }
+      >
         {minting && !success && !failure && (
-          <div className={styles.message}>☁☁️☁️️ uploading ☁️☁️☁</div>
+          <div className={styles.message}>
+            <p>☁☁️☁</p>️️ uploading <p>☁️☁️☁</p>
+          </div>
         )}
         {success && !failure && <div className={styles.message}>{success}</div>}
         {failure && (
@@ -175,6 +205,8 @@ export const MintPremint = () => {
       </div>
       <div className={styles.webcam}>
         <Webcam
+          mirrored={videoConstraints?.facingMode === "user"}
+          onUserMedia={checkHasMultipleCameras}
           forceScreenshotSourceSize={true}
           videoConstraints={videoConstraints}
           screenshotFormat="image/jpeg"
@@ -199,6 +231,9 @@ export const MintPremint = () => {
             <SwitchCamera />
           </button>
         )}
+        <a target="_blank" href={`https://zora.co/${address}`} className={styles.zorb}>
+          <img src={zorbImage} alt="View posts" />
+        </a>
       </div>
     </div>
   );

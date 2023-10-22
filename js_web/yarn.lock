@@ -284,6 +284,18 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.18.20.tgz#786c5f41f043b07afb1af37683d7c33668858f6d"
   integrity sha512-kTdfRcSiDfQca/y9QIkng02avJ+NCaQvrMejlsB3RRv5sE9rRoeBPISaZpKxHELzRxZyLvNts1P27W3wV+8geQ==
 
+"@ethersproject/bytes@^5.5.0":
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/@ethersproject/bytes/-/bytes-5.7.0.tgz#a00f6ea8d7e7534d6d87f47188af1148d71f155d"
+  integrity sha512-nsbxwgFXWh9NyYWo+U8atvmMsSdKJprTcICAkvbBffT75qDocbuggBU0SJiVK2MuTrp0q+xvLkTnGMPK1+uA9A==
+  dependencies:
+    "@ethersproject/logger" "^5.7.0"
+
+"@ethersproject/logger@^5.7.0":
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/@ethersproject/logger/-/logger-5.7.0.tgz#6ce9ae168e74fecf287be17062b590852c311892"
+  integrity sha512-0odtFdXu/XHtjQXJYA3u9G0G8btm0ND5Cu8M7i5vhEcE8/HmF4Lbdqanwyv4uQTr2tx6b7fQRmgLrsnpQlmnig==
+
 "@ipld/car@^3.0.1", "@ipld/car@^3.2.3":
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/@ipld/car/-/car-3.2.4.tgz#115951ba2255ec51d865773a074e422c169fb01c"
@@ -986,6 +998,11 @@
   resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.5.tgz#4751153abbf8d6199babb345a52e1eb4167d64af"
   integrity sha512-s/FPdYRmZR8SjLWGMCuax7r3qCWQw9QKHzXVukAuuIJkXkDRwp+Pu5LMIVFi0Fxbav35WURicYr8u1QsoybnQw==
 
+"@types/tinycolor2@^1.4.3":
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.5.tgz#f6da74c161150bcd2f3dc1bbbcede43590dec2d3"
+  integrity sha512-uLJijDHN5E6j5n1qefF9oaeplgszXglWXWTviMoFr/YxgvbyrkFil20yDT7ljhCiTQ/BfCYtxfJS81LdTro5DQ==
+
 "@types/trusted-types@^2.0.2":
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/@types/trusted-types/-/trusted-types-2.0.5.tgz#5cac7e7df3275bb95f79594f192d97da3b4fd5fe"
@@ -1507,12 +1524,12 @@
   resolved "https://registry.yarnpkg.com/@zoralabs/openzeppelin-contracts-upgradeable/-/openzeppelin-contracts-upgradeable-4.8.4.tgz#130b69cd5ff70b1f67da11fe53fe8b2323464b84"
   integrity sha512-5vhL88tz00Gv2+NUhLdYBRqb9RRekfyQAodXTQxJU2LYxxy6jr1mPycTZempQ1kmw5wIwFbSIoYzpaxOx6UK6Q==
 
-"@zoralabs/premint-sdk@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@zoralabs/premint-sdk/-/premint-sdk-0.0.1.tgz#9d21d0d7b799916a0e15a42e4493ae1253fc6757"
-  integrity sha512-AYXZRVP8iecLLmNn52eDKdh0rHuvdvHUu7DHx9YSuGlwATl28DulaQWYIvXa4FeXfkKC2ggxJWZ+7gaklDdgEQ==
+"@zoralabs/premint-sdk@0.0.2-premint-api.1":
+  version "0.0.2-premint-api.1"
+  resolved "https://registry.yarnpkg.com/@zoralabs/premint-sdk/-/premint-sdk-0.0.2-premint-api.1.tgz#6f4385bfdedc2908d1bbaabeb1748e9f9a81a6a8"
+  integrity sha512-pPKmk/+oBslPGQJzomA0AFeX9us1Qq08BnRwPXGMZ5K7BiFUeBcV0tgV2N2YFMJSkWdUB15+gsxNlkLTe+WNSQ==
   dependencies:
-    "@zoralabs/zora-1155-contracts" "*"
+    "@zoralabs/zora-1155-contracts" "2.1.1-premint-api.0"
     abitype "^0.8.7"
 
 "@zoralabs/protocol-rewards@*":
@@ -1523,7 +1540,32 @@
     ds-test "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b"
     forge-std "https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80"
 
-"@zoralabs/zora-1155-contracts@*", "@zoralabs/zora-1155-contracts@^2.1.0":
+"@zoralabs/zora-1155-contracts@2.1.1-premint-api.0":
+  version "2.1.1-premint-api.0"
+  resolved "https://registry.yarnpkg.com/@zoralabs/zora-1155-contracts/-/zora-1155-contracts-2.1.1-premint-api.0.tgz#e3ae0f9ea0b1ef444c094e9e98307ac93120d5a6"
+  integrity sha512-ZZO7Hnvjc+yqPS1PFdRNrlC2zFyEntE2y7JDq5170I8Z2VnZee+IdoqgNdkrmT3mRCqHq7EhoEYf4oT0xm5ghw==
+  dependencies:
+    "@openzeppelin/contracts" "4.9.2"
+    "@wagmi/cli" "^1.0.1"
+    "@zoralabs/openzeppelin-contracts-upgradeable" "4.8.4"
+    "@zoralabs/protocol-rewards" "*"
+    abitype "^0.8.7"
+    ds-test "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b"
+    es-main "^1.2.0"
+    forge-std "https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80"
+    glob "^10.2.2"
+    prettier "^2.8.8"
+    prettier-plugin-solidity "^1.1.3"
+    solady "^0.0.123"
+    solmate "^6.1.0"
+    tsup "^7.2.0"
+    tsx "^3.13.0"
+    typescript "^5.0.4"
+    viem "^1.16.2"
+    vite "^4.1.4"
+    vitest "~0.30.1"
+
+"@zoralabs/zora-1155-contracts@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@zoralabs/zora-1155-contracts/-/zora-1155-contracts-2.1.0.tgz#1586785980e4cfb6ad2366fbed57765cfa1bde3e"
   integrity sha512-0OUzkKWp45cjMKzLB4JzpJ7KHDaQfknxbb22uUbXLKukGA07WLdzmrvTKcXmnT69d09qiyRfrxBqek49SKn8MQ==
@@ -1547,6 +1589,15 @@
     viem "^1.16.2"
     vite "^4.1.4"
     vitest "~0.30.1"
+
+"@zoralabs/zorb@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@zoralabs/zorb/-/zorb-0.1.0.tgz#c01a67b6c84ef9ef80db4bdfc5778108d2704d19"
+  integrity sha512-8uyOQDzcLyCZlvmHTE8rH2WSpWXEO2TP5sT49SkzOAvccgyRzUmz8qBB5nIWQoSZenwE6XnQjqeEJVMT1Sg8IQ==
+  dependencies:
+    "@ethersproject/bytes" "^5.5.0"
+    "@types/tinycolor2" "^1.4.3"
+    tinycolor2 "^1.4.2"
 
 "@zxing/text-encoding@0.9.0":
   version "0.9.0"
@@ -2241,6 +2292,11 @@ dotenv@^16.0.3:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.3.1.tgz#369034de7d7e5b120972693352a3bf112172cc3e"
   integrity sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==
 
+"ds-test@git+https://github.com/dapphub/ds-test.git#cd98eff28324bfac652e63a239a60632a761790b":
+  version "1.0.0"
+  uid cd98eff28324bfac652e63a239a60632a761790b
+  resolved "git+https://github.com/dapphub/ds-test.git#cd98eff28324bfac652e63a239a60632a761790b"
+
 "ds-test@https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b":
   version "1.0.0"
   resolved "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b"
@@ -2582,6 +2638,11 @@ foreground-child@^3.1.0:
   dependencies:
     cross-spawn "^7.0.0"
     signal-exit "^4.0.1"
+
+"forge-std@git+https://github.com/foundry-rs/forge-std.git#705263c95892a906d7af65f0f73ce8a4a0c80b80":
+  version "1.6.0"
+  uid "705263c95892a906d7af65f0f73ce8a4a0c80b80"
+  resolved "git+https://github.com/foundry-rs/forge-std.git#705263c95892a906d7af65f0f73ce8a4a0c80b80"
 
 "forge-std@https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80":
   version "1.6.0"
@@ -4792,6 +4853,11 @@ tinybench@^2.4.0:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/tinybench/-/tinybench-2.5.1.tgz#3408f6552125e53a5a48adee31261686fd71587e"
   integrity sha512-65NKvSuAVDP/n4CqH+a9w2kTlLReS9vhsAP06MWx+/89nMinJyB2icyl58RIcqCmIggpojIGeuJGhjU1aGMBSg==
+
+tinycolor2@^1.4.2:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.6.0.tgz#f98007460169b0263b97072c5ae92484ce02d09e"
+  integrity sha512-XPaBkWQJdsf3pLKJV9p4qN/S+fm2Oj8AIPo1BTUhg5oxkvm9+SVEGFdhyOz7tTdUTfvxMiAs4sp6/eZO2Ew+pw==
 
 tinypool@^0.4.0:
   version "0.4.0"
