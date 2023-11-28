@@ -8,7 +8,7 @@
     "demo"
   ],
   "dependencies": {
-    "@zoralabs/premint-sdk": "0.0.2-premint-api.1",
+    "@zoralabs/protocol-sdk": "^0.3.2",
     "@zoralabs/zora-1155-contracts": "^2.1.0",
     "@zoralabs/zorb": "^0.1.0",
     "next": "^13.5.6",

@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { ConnectWallet } from "./ConnectWallet";
-import { PremintAPI } from "@zoralabs/premint-sdk";
+import { createPremintClient } from "@zoralabs/protocol-sdk";
 import styles from "./MintPremint.module.css";
 import { PhotoButton } from "./PhotoButton";
 import Webcam from "react-webcam";
@@ -62,9 +62,12 @@ export const MintPremint = () => {
         console.error("no walletclient");
         return;
       }
-      const premintAPI: any = new PremintAPI(walletClient.chain);
-
-      const premint = await premintAPI.createPremint({
+      if (!address) {
+        console.error("no admin");
+        return;
+      }
+      const premintClient = createPremintClient({ chain: walletClient.chain });
+      const premint = await premintClient.createPremint({
         checkSignature: true,
         collection: {
           contractAdmin: address,
@@ -72,13 +75,13 @@ export const MintPremint = () => {
           contractURI:
             "ipfs://bafkreibhv77r5pijfaafx3vv6hphlira2kefouzrbhow2dzl7kornv5wcq",
         },
-        publicClient,
         account: walletClient.account.address,
         walletClient,
         token: {
           tokenURI: url,
         },
       });
+
       console.log({ premint });
       return premint;
     },
@@ -122,12 +125,12 @@ export const MintPremint = () => {
         const { url } = await response.json();
         try {
           console.log({ url });
-          const { zoraUrl } = await processPremint(url);
+          const premintData = await processPremint(url);
           setSuccess(
             <div>
               <p>Minted 🎉</p>
               <p>
-                <a target="_blank" href={zoraUrl}>
+                <a target="_blank" href={premintData?.urls.zoraCollect || "#"}>
                   📸 view on ZORA
                 </a>
               </p>
@@ -231,7 +234,11 @@ export const MintPremint = () => {
             <SwitchCamera />
           </button>
         )}
-        <a target="_blank" href={`https://zora.co/${address}`} className={styles.zorb}>
+        <a
+          target="_blank"
+          href={`https://zora.co/${address}`}
+          className={styles.zorb}
+        >
           <img src={zorbImage} alt="View posts" />
         </a>
       </div>
